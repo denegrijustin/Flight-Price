@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Premium Flight Intelligence | MCI to Naples</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Platform navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">FI</div>
+          <div>
+            <p class="eyebrow">Premium Flight Intelligence</p>
+            <h1>MCI to NAP</h1>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Primary">
+          <a class="active" href="#dashboard" aria-current="page">Dashboard</a>
+          <a href="#cash">Cash fares</a>
+          <a href="#awards">Awards</a>
+          <a href="#signals">Signals</a>
+          <a href="#admin">Admin</a>
+        </nav>
+
+        <section class="route-panel" aria-label="Route profile">
+          <div class="panel-heading">
+            <p class="eyebrow">Route profile</p>
+            <span class="status-dot"></span>
+          </div>
+          <div class="route-stack">
+            <div>
+              <strong>MCI</strong>
+              <span>Kansas City</span>
+            </div>
+            <div class="route-line" aria-hidden="true"></div>
+            <div>
+              <strong>NAP</strong>
+              <span>Naples, Italy</span>
+            </div>
+          </div>
+          <dl class="compact-list">
+            <div>
+              <dt>Dates</dt>
+              <dd>Jun 15 to Jun 27</dd>
+            </div>
+            <div>
+              <dt>Travelers</dt>
+              <dd>2</dd>
+            </div>
+            <div>
+              <dt>Cabins</dt>
+              <dd>Business, First</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <main id="dashboard" class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Sample decision support</p>
+            <h2>Should I book now or wait?</h2>
+          </div>
+          <div class="topbar-actions">
+            <div class="buy-meter" aria-label="Right time to buy meter">
+              <div>
+                <span class="metric-label">Right time to buy</span>
+                <strong id="buyMeterLabel">Wait</strong>
+              </div>
+              <div class="meter-track" aria-hidden="true">
+                <span id="buyMeterFill"></span>
+              </div>
+              <small id="buyMeterNote">Mock prices are close, but not under target.</small>
+            </div>
+            <div class="toolbar" aria-label="Dashboard controls">
+              <button class="icon-button" id="refreshButton" type="button" aria-label="Refresh sample intelligence">
+                <span aria-hidden="true">↻</span>
+              </button>
+              <button class="text-button secondary" id="liveSearchButton" type="button">Check live fares</button>
+              <button class="text-button" id="simulateButton" type="button">Simulate deal</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="sample-banner" aria-label="Sample data notice">
+          <strong>Sample/mock data</strong>
+          <span id="dataStatus">This dashboard is showing illustrative fares until SerpAPI returns live Google Flights data.</span>
+        </section>
+
+        <section class="target-verdict" aria-labelledby="target-title">
+          <div>
+            <p class="eyebrow">Top dashboard card</p>
+            <h2 id="target-title">Does this beat the target?</h2>
+            <p id="targetAnswer" class="target-answer">Evaluating current premium-cabin options...</p>
+          </div>
+          <div class="target-grid" aria-label="Booking targets">
+            <div>
+              <span>Cash</span>
+              <strong>&lt;$1,000</strong>
+              <small>per traveler / &lt;$2,000 total</small>
+            </div>
+            <div>
+              <span>United Miles</span>
+              <strong>&lt;=80,000</strong>
+              <small>total for 2 travelers</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="decision-strip" aria-label="Current booking decision">
+          <article class="decision-card primary">
+            <span class="metric-label">Recommendation</span>
+            <strong id="decisionLabel">Wait</strong>
+            <p id="decisionReason">No target-beating premium option has appeared yet.</p>
+          </article>
+          <article class="decision-card">
+            <span class="metric-label">Best cash fare</span>
+            <strong id="bestCash">$2,420</strong>
+            <p><span id="cashPerTraveler">$1,210</span> per traveler</p>
+          </article>
+          <article class="decision-card">
+            <span class="metric-label">Best United award</span>
+            <strong id="bestAward">92,000</strong>
+            <p><span id="awardPerTraveler">46,000</span> miles each + taxes</p>
+          </article>
+          <article class="decision-card">
+            <span class="metric-label">Deal score</span>
+            <strong id="dealScore">84</strong>
+            <p id="dealBand">Strong deal, close to target</p>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <section id="cash" class="workspace-panel wide" aria-labelledby="cash-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Cash fare tracker</p>
+                <h3 id="cash-title">Premium-cabin cash intelligence</h3>
+              </div>
+              <div class="segmented-control" role="tablist" aria-label="Chart range">
+                <button class="active" type="button" data-range="7">7D</button>
+                <button type="button" data-range="30">30D</button>
+                <button type="button" data-range="90">90D</button>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="fareChart" width="900" height="310" aria-label="Fare trend chart"></canvas>
+              <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
+            </div>
+            <div class="fare-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Airline</th>
+                    <th>Routing</th>
+                    <th>Cabin</th>
+                    <th>Total</th>
+                    <th>Traveler</th>
+                    <th>Quality</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody id="fareRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="awards" class="workspace-panel" aria-labelledby="award-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Award travel tracker</p>
+                <h3 id="award-title">United baseline</h3>
+              </div>
+              <span class="pill">80,000 miles available</span>
+            </div>
+            <div class="award-list" id="awardList"></div>
+          </section>
+
+          <section class="workspace-panel map-panel" aria-labelledby="map-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Routing quality</p>
+                <h3 id="map-title">Best observed path</h3>
+              </div>
+              <span class="pill success">2 stops</span>
+            </div>
+            <div class="route-map" aria-label="Leaflet map from Kansas City to Naples through connecting airports">
+              <div id="leafletMap" role="img" aria-label="Map plotting MCI to NAP premium route connections">
+                <div class="map-fallback">Loading route map...</div>
+              </div>
+            </div>
+            <div class="route-legend" id="routeLegend" aria-label="Observed connecting airports"></div>
+            <dl class="quality-grid">
+              <div>
+                <dt>Duration</dt>
+                <dd id="durationMetric">14h 25m</dd>
+              </div>
+              <div>
+                <dt>Aircraft</dt>
+                <dd id="aircraftMetric">787-9</dd>
+              </div>
+              <div>
+                <dt>Cabin</dt>
+                <dd id="cabinMetric">Lie-flat</dd>
+              </div>
+              <div>
+                <dt>Score</dt>
+                <dd id="qualityMetric">91</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section id="signals" class="workspace-panel wide" aria-labelledby="signals-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Alert engine</p>
+                <h3 id="signals-title">Meaningful action only</h3>
+              </div>
+              <label class="toggle-row">
+                <input id="onlyActionable" type="checkbox" checked />
+                <span>Actionable only</span>
+              </label>
+            </div>
+            <div class="signal-list" id="signalList"></div>
+          </section>
+
+          <section id="admin" class="workspace-panel admin-panel" aria-labelledby="admin-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Admin profile</p>
+                <h3 id="admin-title">Thresholds</h3>
+              </div>
+            </div>
+            <label class="input-row">
+              <span>Cash target per traveler</span>
+              <input id="cashTarget" type="number" min="500" max="5000" step="50" value="1000" />
+            </label>
+            <label class="input-row">
+              <span>United miles total</span>
+              <input id="milesTarget" type="number" min="20000" max="300000" step="5000" value="80000" />
+            </label>
+            <label class="input-row">
+              <span>Collection frequency</span>
+              <select id="frequency">
+                <option>Every 6 hours</option>
+                <option>Every 12 hours</option>
+                <option>Daily</option>
+              </select>
+            </label>
+            <div class="provider-grid" aria-label="Provider settings">
+              <button type="button" class="provider active">Google Flights</button>
+              <button type="button" class="provider active">Amadeus</button>
+              <button type="button" class="provider">Duffel</button>
+              <button type="button" class="provider">SerpAPI</button>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
