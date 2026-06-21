@@ -1,4 +1,1 @@
-{.    "scripts": {
-      "build": "mkdir -p dist && cp README.md _headers app.js index.html styles.css dist/"
-}
-}
+{"scripts":{"build":"mkdir -p dist && cp README.md _headers app.js index.html styles.css dist/"}}
